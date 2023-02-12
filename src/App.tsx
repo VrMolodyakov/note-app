@@ -1,24 +1,18 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "bootstrap/dist/css/bootstrap.min.css"
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react'
 
 function App() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate("/new");
+  }, []);  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+    <Routes>
+      <Route path = "/" element = {<h1>Hi there</h1>} />
+      <Route path = "/new" element = {<h1>New</h1>} />
+    </Routes>
     </div>
   );
 }
