@@ -1,8 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css"
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from 'react'
-import {NewNote} from "./Note"
 import { Container } from "react-bootstrap";
+import { NewNote } from "../../futures/note/Note";
 
 function App() { 
   const navigate = useNavigate();
