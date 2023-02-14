@@ -3,8 +3,9 @@ import {Form,Stack,Row,Col} from "react-bootstrap"
 import { Link } from "react-router-dom";
 import CreatableReactSelect from "react-select/creatable"
 import { NoteData, Tag } from "../../components/note/note";
-import "./NoteForm.css"
+import "./note-form.css"
 import { style } from "./tag-style";
+import {v4 as uuidV4} from "uuid"
 
 
 type NoteFormProps = {
@@ -19,9 +20,10 @@ export function NoteFrom({onSubmit}:NoteFormProps){
     function handleSubmit(e:FormEvent)  {
         e.preventDefault()
         onSubmit({
+            id:uuidV4(),
             title:titleRef.current!.value,
             markdown:markdownRef.current!.value,
-            tags:[]
+            tags:selectedTags
         })
     }
 
@@ -44,6 +46,10 @@ export function NoteFrom({onSubmit}:NoteFormProps){
                             value = {selectedTags.map(tag => {
                                 return {label:tag.label, value: tag.id}
                             })}
+                            onCreateOption ={label =>{
+                                const newTag = {id:uuidV4(),label}
+                                setSelectedTags(prev => [...prev,newTag])
+                            }}
                             onChange = {tags =>{
                                 setSelectedTags(tags.map(tag => {
                                     return {label:tag.label,id:tag.value}

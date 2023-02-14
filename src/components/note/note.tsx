@@ -1,4 +1,5 @@
 export type NoteData = {
+    id:string
     title: string
     markdown: string
     tags: Tag[]
