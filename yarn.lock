@@ -1877,6 +1877,11 @@
   dependencies:
     "tslib" "^2.4.0"
 
+"@tauri-apps/api@^1.2.0":
+  "integrity" "sha512-lsI54KI6HGf7VImuf/T9pnoejfgkNoXveP14pVV7XarrQ46rOejIVJLFqHI9sRReJMGdh2YuCoI3cc/yCWCsrw=="
+  "resolved" "https://registry.npmjs.org/@tauri-apps/api/-/api-1.2.0.tgz"
+  "version" "1.2.0"
+
 "@tauri-apps/cli-win32-x64-msvc@1.2.3":
   "integrity" "sha512-CsbHQ+XhnV/2csOBBDVfH16cdK00gNyNYUW68isedmqcn8j+s0e9cQ1xXIqi+Hue3awp8g3ImYN5KPepf3UExw=="
   "resolved" "https://registry.npmjs.org/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-1.2.3.tgz"

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Container } from "react-bootstrap";
 import { NewNote } from "../../futures/note/note";
 import { NoteData } from "../note/note";
-
+import { invoke } from '@tauri-apps/api/tauri'
 
 function App() { 
 
@@ -13,8 +13,9 @@ function App() {
     navigate("/new");
   }, []);  
 
-  function onCreateNote(data:NoteData){
+  async function onCreateNote(data:NoteData){
     console.log(data)
+    await invoke('create_note_command', {note:data});
   }
 
   return (
