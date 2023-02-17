@@ -2,10 +2,12 @@
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
 )]
-
+mod fs;
 use serde::{Deserialize, Serialize};
+use tokio::fs::File;
 use tokio::sync::mpsc;
 use tokio::sync::Mutex;
+use tracing::info;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,33 +23,6 @@ struct Note {
 struct Tag {
     id: String,
     label: String,
-}
-
-struct InputTx {
-    inner: Mutex<mpsc::Sender<Note>>,
-}
-
-fn main() {
-    let (input_tx, input_rx) = mpsc::channel(1);
-
-    tauri::Builder::default()
-        .manage(InputTx {
-            inner: Mutex::new(input_tx),
-        })
-        .invoke_handler(tauri::generate_handler![create_note_command])
-        .setup(|app| {
-            tauri::async_runtime::spawn(async move { process(input_rx).await });
-            Ok(())
-        })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
-}
-
-#[tauri::command]
-async fn create_note_command(note: Note, state: tauri::State<'_, InputTx>) -> Result<(), Error> {
-    let input_tx = state.inner.lock().await;
-    input_tx.send(note).await?;
-    Ok(())
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -67,11 +42,59 @@ impl serde::Serialize for Error {
     }
 }
 
-async fn process(mut input_rx: mpsc::Receiver<Note>) {
+struct InputTx {
+    inner: Mutex<mpsc::Sender<Note>>,
+}
+
+#[tokio::main]
+async fn main() {
+    if let Err(err) = on_startup().await{
+        panic!("{}",err);
+    }
+    info!("app has started");
+    let (input_tx, input_rx) = mpsc::channel(1);
+
+    tauri::Builder::default()
+        .manage(InputTx {
+            inner: Mutex::new(input_tx),
+        })
+        .invoke_handler(tauri::generate_handler![create_note_command])
+        .setup(|_app| {
+            tauri::async_runtime::spawn(async move { process(input_rx).await });
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
+
+#[tauri::command]
+async fn create_note_command(note: Note, state: tauri::State<'_, InputTx>) -> Result<(), Error> {
+    let input_tx = state.inner.lock().await;
+    input_tx.send(note).await?;
+    Ok(())
+}
+async fn on_startup() -> Result<(),Error>{
+    fs::create_folder().await?;
+    Ok(())
+}
+
+async fn process(mut input_rx: mpsc::Receiver<Note>) -> Result<(), Error> {
     loop {
         tokio::select! {
           note = input_rx.recv() =>{
-            println!("was receiver message = {:?} ",note)
+            if let Some(note) = note{
+                info!("was receiver message = {:?} ",note);
+                let mut path = fs::SAVE_DIR.to_owned();
+                path.push_str(&note.id);
+                // if let Ok(file) = fs::create(&path).await{
+                //     println!("file exists: {:?}", file.metadata().await);
+                // }
+                let is_exists = fs::is_exists(&path).await;
+                let file:File;
+                if let Err(_) = is_exists{
+                    file = fs::create(&path).await?;
+                }
+            }
           }
         }
     }
@@ -92,4 +115,18 @@ fn test() {
     println!("serialized = {}", serialized);
     let deserialized: Note = serde_json::from_str(&serialized).unwrap();
     println!("deserialized = {:?}", deserialized);
+}
+
+#[tokio::test]
+async fn test_file() {
+    if let Err(is_exs) = fs::is_exists("abc.txt").await {
+        println!("file exists: {}", is_exs);
+    }
+}
+
+#[tokio::test]
+async fn create_file() {
+    if let Ok(file) = fs::create("abc.txt").await {
+        println!("file exists: {:?}", file.metadata().await);
+    }
 }
