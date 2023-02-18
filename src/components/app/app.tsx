@@ -15,7 +15,7 @@ function App() {
 
   async function onCreateNote(data:NoteData){
     console.log(data)
-    await invoke('create_note_command', {note:data});
+    await invoke('create_note_command', {note:data}).catch((e) => console.error(e));
   }
 
   return (

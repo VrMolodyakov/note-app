@@ -5,9 +5,13 @@
 mod fs;
 use serde::{Deserialize, Serialize};
 use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc;
 use tokio::sync::Mutex;
+use tracing::Level;
 use tracing::info;
+use tracing_subscriber::FmtSubscriber;
+use std::io::Cursor;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -51,6 +55,10 @@ async fn main() {
     if let Err(err) = on_startup().await{
         panic!("{}",err);
     }
+    let subscriber = FmtSubscriber::builder()
+                    .with_max_level(Level::TRACE)
+                    .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
     info!("app has started");
     let (input_tx, input_rx) = mpsc::channel(1);
 
@@ -65,6 +73,7 @@ async fn main() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+    info!("END");
 }
 
 #[tauri::command]
@@ -86,14 +95,16 @@ async fn process(mut input_rx: mpsc::Receiver<Note>) -> Result<(), Error> {
                 info!("was receiver message = {:?} ",note);
                 let mut path = fs::SAVE_DIR.to_owned();
                 path.push_str(&note.id);
-                // if let Ok(file) = fs::create(&path).await{
-                //     println!("file exists: {:?}", file.metadata().await);
-                // }
                 let is_exists = fs::is_exists(&path).await;
-                let file:File;
+                let mut file:File;
                 if let Err(_) = is_exists{
                     file = fs::create(&path).await?;
+                }else{
+                    file = fs::open(&path).await?;
                 }
+                let note = serde_json::to_string(&note).unwrap();
+                let mut buf = Cursor::new(note);
+                file.write_all_buf(&mut buf).await?;
             }
           }
         }
