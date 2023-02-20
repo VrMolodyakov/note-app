@@ -5,6 +5,7 @@ import { Container } from "react-bootstrap";
 import { NewNote } from "../../futures/note/note";
 import { NoteData } from "../note/note";
 import { invoke } from '@tauri-apps/api/tauri'
+import { NoteList } from "../../futures/note/list/note-list";
 
 function App() { 
 
@@ -21,7 +22,7 @@ function App() {
   return (
     <Container className="main-c">
       <Routes>
-        <Route path = "/" element = {<h1>Hi there</h1>} />
+        <Route path = "/" element = {<NoteList/>} />
         <Route path = "/new" element = {<NewNote onSubmit={onCreateNote} />} />
         <Route path = "/:id">
           <Route index element = {<h1>Index</h1>} />

@@ -1,5 +1,6 @@
 import { NoteData } from "../../components/note/note";
-import { NoteFrom } from "./note-form";
+import { NoteFrom } from "./form/note-form";
+
 
 type NewNoteProps = {
     onSubmit:(data:NoteData) => void
