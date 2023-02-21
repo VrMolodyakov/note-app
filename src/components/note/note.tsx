@@ -1,15 +1,6 @@
-export type NoteData = {
-    id:string
-    title: string
-    markdown: string
-    tags: Tag[]
-} 
+import { NoteData } from "./note-data"
 
 export type Note = {
     id: string  
 } & NoteData
 
-export type Tag = {
-    id: string 
-    label: string
-}
