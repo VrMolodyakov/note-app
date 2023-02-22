@@ -3,7 +3,7 @@
     windows_subsystem = "windows"
 )]
 mod fs;
-use serde::{Deserialize, Serialize};
+mod note;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc;
@@ -12,22 +12,7 @@ use tracing::Level;
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 use std::io::Cursor;
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct Note {
-    id: String,
-    title: String,
-    markdown: String,
-    tags: Vec<Tag>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct Tag {
-    id: String,
-    label: String,
-}
+use note::{Note,Tag};
 
 #[derive(Debug, thiserror::Error)]
 enum Error {
@@ -93,7 +78,7 @@ async fn process(mut input_rx: mpsc::Receiver<Note>) -> Result<(), Error> {
           note = input_rx.recv() =>{
             if let Some(note) = note{
                 info!("was receiver message = {:?} ",note);
-                let mut path = fs::SAVE_DIR.to_owned();
+                let mut path = fs::WORK_DIR.to_owned();
                 path.push_str(&note.id);
                 let is_exists = fs::is_exists(&path).await;
                 let mut file:File;
