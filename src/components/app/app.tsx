@@ -14,11 +14,32 @@ function App() {
 
   async function onCreateNote(data:NoteData){
     console.log(data)
-    await invoke('create_note_command', {note:data}).catch((e) => console.error(e));
+    await invoke('create_note', {note:data}).catch((e) => console.error(e));
+  }
+
+  async function getAvailableTags(){
+    await invoke('load_tags').then( (tgs) => {
+       if (isNonEmptyArrayOfTags(tgs)){
+        console.log("get tags := ",tags)
+        SetTags(tgs)
+       }
+    });
+  }
+
+  useEffect(() => {
+    getAvailableTags()
+  }, []);
+
+  function isNonEmptyArrayOfTags(value: unknown): value is Tag[] {
+    return Array.isArray(value) && 
+               value.length > 0 && 
+               value.every(item => (
+                item as Tag).id !== undefined && (item as Tag).label !== undefined
+               )
   }
 
   async function onCreateTag(data:Tag){
-
+    
   }
 
   return (
