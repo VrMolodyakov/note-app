@@ -79,18 +79,18 @@ impl NoteHandler {
         tags
     }
 
-    pub async fn create_note(&self,note: Note) -> Result<(), Box<dyn std::error::Error>> {
-        let mut path = NOTES_WORK_DIR.to_owned();
-        path.push_str(&note.id);
-        let is_exists = is_exists(&path).await;
-        let mut file: File;
-        if let Err(_) = is_exists {
-            file = create(&path).await?;
-        } else {
-            file = open(&path).await?;
-        }
+    pub async fn create_note(&self,note: Note) -> Result<(), io::Error> {
+        let mut file = get_file(&NOTES_WORK_DIR, &note.id).await?;
         let note = serde_json::to_string(&note).unwrap();
         let mut buf = Cursor::new(note);
+        file.write_all_buf(&mut buf).await?;
+        Ok(())
+    }
+
+    pub async fn create_tag(&self,tag:Tag) ->Result<(),io::Error>{
+        let mut file = get_file(&TAGS_WORK_DIR, &tag.id).await?;
+        let tag = serde_json::to_string(&tag).unwrap();
+        let mut buf = Cursor::new(tag);
         file.write_all_buf(&mut buf).await?;
         Ok(())
     }
@@ -99,6 +99,17 @@ impl NoteHandler {
         create_folder().await?;
         Ok(())
     }
+}
+
+pub async fn get_file(dir: &str,file_name:&str) ->  Result<File, io::Error>{
+    let mut path = dir.to_owned();
+    path.push_str(file_name);
+    let is_exists = is_exists(&path).await;
+    let file = match is_exists {
+        Ok(()) => open(&path).await?,
+        Err(_) => create(&path).await?
+    };
+    Ok(file)
 }
 
 pub async fn is_exists(file_name: &'_ str) -> Result<(), std::io::Error> {

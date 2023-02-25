@@ -65,6 +65,7 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                             options={availableTags.map(tag =>{
                                 return {label:tag.label,value:tag.id}
                             })}
+                            
                             />
                         </Form.Group>
                     </Col>

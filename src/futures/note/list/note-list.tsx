@@ -5,6 +5,7 @@ import {Link } from "react-router-dom";
 import ReactSelect from "react-select";
 import { Tag } from "../../../components/note/tag";
 import { style } from "../form/tag-style";
+import "./note-list.css"
 
 type NoteListProps = {
     availableTags:Tag[]
@@ -48,6 +49,9 @@ export function NoteList({availableTags} : NoteListProps){
                                     return {label:tag.label,id:tag.value}
                                 }))
                             }}
+                            options={availableTags.map(tag =>{
+                                return {label:tag.label,value:tag.id}
+                            })}
                             />
                         </Form.Group>
                     </Col>

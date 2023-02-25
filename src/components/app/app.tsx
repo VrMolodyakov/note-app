@@ -17,8 +17,8 @@ function App() {
     await invoke('create_note', {note:data}).catch((e) => console.error(e));
   }
 
-  async function getAvailableTags(){
-    await invoke('load_tags').then( (tgs) => {
+  function getAvailableTags(){
+    invoke('load_tags').then( (tgs) => {
        if (isNonEmptyArrayOfTags(tgs)){
         console.log("get tags := ",tags)
         SetTags(tgs)
@@ -27,6 +27,7 @@ function App() {
   }
 
   useEffect(() => {
+    console.log("use effect")
     getAvailableTags()
   }, []);
 
@@ -38,8 +39,10 @@ function App() {
                )
   }
 
-  async function onCreateTag(data:Tag){
-    
+  async function onCreateTag(newTag:Tag){
+    console.log(newTag)
+    await invoke('create_tag', {tag:newTag}).catch((e) => console.error(e));
+    SetTags(prev => [...prev,newTag])
   }
 
   return (

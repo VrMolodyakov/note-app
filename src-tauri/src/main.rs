@@ -2,16 +2,11 @@
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
 )]
-mod file;
+
 mod note;
-use tokio::fs::File;
-use tokio::io::AsyncWriteExt;
-use tokio::sync::mpsc;
-use tokio::sync::Mutex;
 use tracing::Level;
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
-use std::io::Cursor;
 use note::{Note,Tag,NoteHandler};
 
 #[derive(Debug, thiserror::Error)]
@@ -39,6 +34,12 @@ async fn main() {
     if let Err(error) = note_handler.init_dir().await{
         panic!("{}",error);
     }
+    if let Err(error) = note_handler.load_notes(){
+        info!("{}",error);
+    }
+    if let Err(error) = note_handler.load_tags(){
+        info!("{}",error);
+    }
 
     let subscriber = FmtSubscriber::builder()
                     .with_max_level(Level::TRACE)
@@ -47,28 +48,28 @@ async fn main() {
     info!("app has started");
     tauri::Builder::default()
         .manage(note_handler)
-        .invoke_handler(tauri::generate_handler![create_note,load_tags])
+        .invoke_handler(tauri::generate_handler![create_note,create_tag,load_tags])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
     info!("END");
 }
 
 #[tauri::command]
-async fn create_note(note: Note, state: tauri::State<'_, NoteHandler>) -> Result<(), Error> {
-
+async fn create_note(note: Note, handler: tauri::State<'_, NoteHandler>) -> Result<(), Error> {
+    handler.create_note(note).await?;
     Ok(())
 }
 
 #[tauri::command]
-async fn create_tag(tag: Tag, state: tauri::State<'_, NoteHandler>) -> Result<(), Error> {
-
+async fn create_tag(tag: Tag, handler: tauri::State<'_, NoteHandler>) -> Result<(), Error> {
+    handler.create_tag(tag).await?;
     Ok(())
 }
 
 #[tauri::command]
-async fn load_tags(state: tauri::State<'_, NoteHandler>) -> Result<Vec<Tag>, ()> {
+async fn load_tags(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Tag>, ()> {
     info!("request to load tags");
-    let tags = state.inner().get_tags().await;
+    let tags = handler.get_tags().await;
     info!("get tags : {:?}",tags);
     Ok(tags)
 }
