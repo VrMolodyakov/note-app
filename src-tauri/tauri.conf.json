@@ -59,6 +59,8 @@
         "height": 600,
         "resizable": true,
         "title": "note-app",
+        "transparent": true,
+        "decorations":false,
         "width": 800
       }
     ]

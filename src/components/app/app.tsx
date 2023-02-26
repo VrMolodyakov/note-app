@@ -7,6 +7,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 import { NoteList } from "../../futures/note/list/note-list";
 import { NoteData } from "../note/note-data";
 import { Tag } from "../note/tag";
+import "./app.css"
 
 function App() { 
 
@@ -46,7 +47,7 @@ function App() {
   }
 
   return (
-    <Container className="main-c">
+    <Container className="main-c" fluid>
       <Routes>
         <Route path = "/" element = {<NoteList availableTags={tags}/>} />
         <Route path = "/new" element = {<NewNote onSubmit={onCreateNote} onAddTag={onCreateTag} availableTags={tags} />} />

@@ -4,10 +4,14 @@
 )]
 
 mod note;
+use tauri::Manager;
 use tracing::Level;
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 use note::{Note,Tag,NoteHandler};
+use window_vibrancy::NSVisualEffectMaterial;
+use window_vibrancy::apply_blur;
+use window_vibrancy::apply_vibrancy;
 
 #[derive(Debug, thiserror::Error)]
 enum Error {
@@ -47,6 +51,13 @@ async fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
     info!("app has started");
     tauri::Builder::default()
+        .setup(|app| {
+            let window = app.get_window("main").unwrap();
+            #[cfg(target_os = "windows")]
+            apply_blur(&window, Some((18, 18, 18, 125)))
+            .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+            Ok(())
+        })
         .manage(note_handler)
         .invoke_handler(tauri::generate_handler![create_note,create_tag,load_tags])
         .run(tauri::generate_context!())
