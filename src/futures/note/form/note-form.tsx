@@ -40,7 +40,7 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                     <Col>
                         <Form.Group controlId="title">
                             <Form.Label>Title</Form.Label>
-                            <Form.Control ref={titleRef} required/>
+                            <Form.Control className="input-ttl" ref={titleRef} required/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -48,7 +48,6 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                             <Form.Label>Tags</Form.Label>
                             <CreatableReactSelect 
                             isMulti 
-                            styles={style} 
                             value = {selectedTags.map(tag => {
                                 return {label:tag.label, value: tag.id}
                             })}
@@ -65,6 +64,18 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                             options={availableTags.map(tag =>{
                                 return {label:tag.label,value:tag.id}
                             })}
+                            theme={theme => ({
+                                ...theme,
+                                borderRadius: 0,
+                                backgroundColor:"red",
+                                color: "#c6a3390",
+                                colors: {
+                                  ...theme.colors,
+                                  primary: "#b90000",
+                                  primary25: "#c9cad0",
+                                  primary50: "#c9cad0"
+                                }
+                              })}
                             
                             />
                         </Form.Group>

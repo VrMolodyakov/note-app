@@ -16,7 +16,7 @@ export function NoteList({availableTags} : NoteListProps){
     return (
         <>
             <Row>
-                <Col><h1>Notes</h1></Col>
+                <Col><h1 className="note-tag">Notes</h1></Col>
                 <Col xs = "auto">
                     <Stack gap={2} direction="horizontal">
                         <Link to={"/new"}>
@@ -31,13 +31,13 @@ export function NoteList({availableTags} : NoteListProps){
                 <Row className="mb-4 mt-2">
                     <Col>
                         <Form.Group controlId="title">
-                            <Form.Label>Title</Form.Label>
+                            <Form.Label className="list-label">Title</Form.Label>
                             <Form.Control type="text"/>
                         </Form.Group>
                     </Col>
                     <Col>
                         <Form.Group controlId="tags">
-                            <Form.Label>Tags</Form.Label>
+                            <Form.Label className="list-label">Tags</Form.Label>
                             <ReactSelect 
                             isMulti 
                             styles={style} 

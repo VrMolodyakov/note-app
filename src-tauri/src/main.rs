@@ -56,6 +56,8 @@ async fn main() {
             #[cfg(target_os = "windows")]
             apply_blur(&window, Some((18, 18, 18, 125)))
             .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+
+            window.set_decorations(true);
             Ok(())
         })
         .manage(note_handler)

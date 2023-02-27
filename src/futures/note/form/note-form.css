@@ -3,10 +3,10 @@
     border-color: -moz-use-text-color #FFFFFF #FFFFFF -moz-use-text-color;
     border-image: none;
     border-radius: 6px 6px 6px 6px;
-    border-style: none solid solid none;
-    border-width: medium 1px 1px medium;
+    border-style: solid ;
+    border-width: 1px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12) inset;
-    color: #555555;
+    color: rgb(255, 255, 255);
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 1em;
     line-height: 1.4em;
@@ -15,14 +15,28 @@
     
 }
 
+#input-ttl{
+  border-color: "#c6a3390";
+}
+
+#title{
+  background-color: #fff0;
+  border-color: #a3c639;
+}
+
 #markdown.form-control:focus {
-    background: none repeat scroll 0 0 #FFFFFF;
+    background: none repeat scroll 0 0 #c5b3b34b;
     outline-width: 0;
-    border:1px solid rgb(49, 49, 49);
+    border:1px solid rgb(82, 207, 9);
+    border-color: #a3c639;
+}
+
+#markdown.form-control {
+  border-color: #a3c639;
 }
 
 #title.form-control:focus {
-    border-color: #7a7a7a;
+    border-color: "#c6a3390";
     box-shadow: 0 0 0px rgb(49, 49, 49)
 }
 

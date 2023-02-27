@@ -5,4 +5,10 @@ code {
 
 body {
   background-color: #fff0 !important;
+  border-radius: 40px !important;
+  overflow: hidden !important;
+}
+
+.element-inside-your-body {
+  overflow: auto;
 }
