@@ -57,3 +57,16 @@
   background-color: rgba(44, 46, 170, 0.781); 
   border-color: rgb(163, 168, 241);   
 }
+
+#react-select-5-listbox{
+  background-color: #fff0;
+  color: #a3c639;
+}
+
+.css-1q6aj2e-option{
+  background-color: rgba(50, 93, 211, 0.63) !important;
+}
+
+.css-13qatl9-multiValue{
+  background-color:rgba(13, 241, 13, 0.904) !important;
+}

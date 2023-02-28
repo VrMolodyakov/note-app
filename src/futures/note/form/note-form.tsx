@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import CreatableReactSelect from "react-select/creatable"
 import "./note-form.css"
 import {v4 as uuidV4} from "uuid"
-import { style } from "./tag-style";
+import { style } from "../../../components/note/tag-style";
 import { NoteData } from "../../../components/note/note-data";
 import { Tag } from "../../../components/note/tag";
 
@@ -48,6 +48,7 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                             <Form.Label>Tags</Form.Label>
                             <CreatableReactSelect 
                             isMulti 
+                            styles={style}
                             value = {selectedTags.map(tag => {
                                 return {label:tag.label, value: tag.id}
                             })}
@@ -67,7 +68,7 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                             theme={theme => ({
                                 ...theme,
                                 borderRadius: 0,
-                                backgroundColor:"red",
+                                backgroundColor:"blue",
                                 color: "#c6a3390",
                                 colors: {
                                   ...theme.colors,

@@ -4,7 +4,7 @@ import {Form,Stack,Row,Col, Button} from "react-bootstrap"
 import {Link } from "react-router-dom";
 import ReactSelect from "react-select";
 import { Tag } from "../../../components/note/tag";
-import { style } from "../form/tag-style";
+import { style } from "../../../components/note/tag-style";
 import "./note-list.css"
 
 type NoteListProps = {
@@ -40,7 +40,7 @@ export function NoteList({availableTags} : NoteListProps){
                             <Form.Label className="list-label">Tags</Form.Label>
                             <ReactSelect 
                             isMulti 
-                            styles={style} 
+                            styles={style}
                             value = {selectedTags.map(tag => {
                                 return {label:tag.label, value: tag.id}
                             })}
@@ -52,6 +52,18 @@ export function NoteList({availableTags} : NoteListProps){
                             options={availableTags.map(tag =>{
                                 return {label:tag.label,value:tag.id}
                             })}
+                            theme={theme => ({
+                                ...theme,
+                                borderRadius: 0,
+                                backgroundColor:"blue",
+                                color: "#c6a3390",
+                                colors: {
+                                  ...theme.colors,
+                                  primary: "#b90000",
+                                  primary25: "#c9cad0",
+                                  primary50: "#c9cad0"
+                                }
+                              })}
                             />
                         </Form.Group>
                     </Col>

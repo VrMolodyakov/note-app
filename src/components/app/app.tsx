@@ -7,7 +7,9 @@ import { invoke } from '@tauri-apps/api/tauri'
 import { NoteList } from "../../futures/note/list/note-list";
 import { NoteData } from "../note/note-data";
 import { Tag } from "../note/tag";
+
 import "./app.css"
+import { Select } from "../select/select";
 
 function App() { 
 
