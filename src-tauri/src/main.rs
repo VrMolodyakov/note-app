@@ -34,7 +34,7 @@ impl serde::Serialize for Error {
 
 #[tokio::main]
 async fn main() {
-    let note_handler = note::NoteHandler::new();
+    let mut note_handler = note::NoteHandler::new();
     if let Err(error) = note_handler.init_dir().await{
         panic!("{}",error);
     }
@@ -56,12 +56,11 @@ async fn main() {
             #[cfg(target_os = "windows")]
             apply_blur(&window, Some((18, 18, 18, 125)))
             .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
-
-            window.set_decorations(true);
+            window.set_decorations(true)?;
             Ok(())
         })
         .manage(note_handler)
-        .invoke_handler(tauri::generate_handler![create_note,create_tag,load_tags])
+        .invoke_handler(tauri::generate_handler![create_note,create_tag,load_tags,load_notes])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
     info!("END");
@@ -84,6 +83,14 @@ async fn load_tags(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Tag>, (
     info!("request to load tags");
     let tags = handler.get_tags().await;
     info!("get tags : {:?}",tags);
+    Ok(tags)
+}
+
+#[tauri::command]
+async fn load_notes(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Note>, ()> {
+    info!("request to load tags");
+    let tags = handler.get_notes().await;
+    info!("get notes : {:?}",tags);
     Ok(tags)
 }
 

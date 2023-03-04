@@ -1,4 +1,3 @@
-use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::{
@@ -20,7 +19,7 @@ pub struct Note {
     pub tags: Vec<Tag>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize,Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Tag {
     pub id: String,
@@ -28,44 +27,38 @@ pub struct Tag {
 }
 
 pub struct NoteHandler {
-    notes: DashMap<String, Note>,
-    tags: DashMap<String, Tag>,
+    notes: Vec<Note>,
+    tags: Vec<Tag>,
 }
 
 impl NoteHandler {
     pub fn new() -> NoteHandler {
         NoteHandler {
-            notes: DashMap::new(),
-            tags: DashMap::new(),
+            notes: Vec::new(),
+            tags: Vec::new(),
         }
     }
 
-    pub fn load_notes(&self) -> Result<(), io::Error> {
+    pub fn load_notes(&mut self) -> Result<(), io::Error> {
         let files = notes()?;
         for path in files {
             let file = fs::File::open(path)?;
             let reader = BufReader::new(file);
             let note: Note = serde_json::from_reader(reader)?;
-            self.notes.insert(note.id.to_owned(), note);
+            self.notes.push(note);
         }
         Ok(())
     }
 
-    pub fn load_tags(&self) -> Result<(), io::Error> {
+    pub fn load_tags(&mut self) -> Result<(), io::Error> {
         let files = tags()?;
         for path in files {
             let file = fs::File::open(path)?;
             let reader = BufReader::new(file);
             let tag: Tag = serde_json::from_reader(reader)?;
-            self.tags.insert(tag.id.to_owned(), tag);
+            self.tags.push(tag);
         }
         Ok(())
-    }
-
-    pub fn print_all(&self) {
-        for pair in self.notes.iter() {
-            println!("{:?} , {:?}", pair.key(), pair.value())
-        }
     }
 
     pub async fn get_tags(&self) -> Vec<Tag> {
@@ -77,6 +70,19 @@ impl NoteHandler {
             })
         });
         tags
+    }
+
+    pub async fn get_notes(&self) -> Vec<Note> {
+        let mut notes = Vec::new();
+        self.notes.iter().for_each(|i| {
+            notes.push(Note {
+                title: i.title.to_owned(),
+                markdown: i.markdown.to_owned(),
+                tags: get_tags(i),
+                id: i.id.to_owned(),
+            })
+        });
+        notes
     }
 
     pub async fn create_note(&self,note: Note) -> Result<(), io::Error> {
@@ -99,6 +105,15 @@ impl NoteHandler {
         create_folder().await?;
         Ok(())
     }
+}
+
+pub fn get_tags(note:&Note) ->Vec<Tag>{
+    let mut tags = Vec::new();
+    note.tags.iter().for_each(|t| {
+        let cln = t.to_owned();
+        tags.push(cln);
+    });
+    tags
 }
 
 pub async fn get_file(dir: &str,file_name:&str) ->  Result<File, io::Error>{

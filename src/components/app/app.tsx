@@ -10,54 +10,76 @@ import { Tag } from "../note/tag";
 
 import "./app.css"
 import { Select } from "../select/select";
+import { Note } from "../note/note";
 
-function App() { 
+function App() {
 
-  const [tags,SetTags] = useState<Tag[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
+  const [notes, setNotes] = useState<Note[]>([])
 
-  async function onCreateNote(data:NoteData){
+  async function onCreateNote(data: NoteData) {
     console.log(data)
-    await invoke('create_note', {note:data}).catch((e) => console.error(e));
+    await invoke('create_note', { note: data }).catch((e) => console.error(e));
   }
 
-  function getAvailableTags(){
-    invoke('load_tags').then( (tgs) => {
-       if (isNonEmptyArrayOfTags(tgs)){
-        console.log("get tags := ",tags)
-        SetTags(tgs)
-       }
+  function getAvailableTags() {
+    invoke('load_tags').then((tags) => {
+      if (isNonEmptyArrayOfTags(tags)) {
+        setTags(tags)
+      }
+    });
+  }
+
+  function getAvailableNotes() {
+    invoke('load_notes').then((notes) => {
+      if (isNonEmptyArrayOfNotes(notes)) {
+        console.log(notes)
+        setNotes(notes)
+      }
     });
   }
 
   useEffect(() => {
     console.log("use effect")
     getAvailableTags()
+    getAvailableNotes()
   }, []);
 
   function isNonEmptyArrayOfTags(value: unknown): value is Tag[] {
-    return Array.isArray(value) && 
-               value.length > 0 && 
-               value.every(item => (
-                item as Tag).id !== undefined && (item as Tag).label !== undefined
-               )
+    return Array.isArray(value) &&
+      value.length > 0 &&
+      value.every(item => (
+        item as Tag).id !== undefined && (item as Tag).label !== undefined
+      )
   }
 
-  async function onCreateTag(newTag:Tag){
+  function isNonEmptyArrayOfNotes(value: unknown): value is Note[] {
+    return Array.isArray(value) &&
+      value.length > 0 &&
+      value.every(item =>
+        (item as Note).id !== undefined &&
+        (item as Note).tags !== undefined &&
+        (item as Note).markdown !== undefined &&
+        (item as Note).title !== undefined
+      )
+  }
+
+  async function onCreateTag(newTag: Tag) {
     console.log(newTag)
-    await invoke('create_tag', {tag:newTag}).catch((e) => console.error(e));
-    SetTags(prev => [...prev,newTag])
+    await invoke('create_tag', { tag: newTag }).catch((e) => console.error(e));
+    setTags(prev => [...prev, newTag])
   }
 
   return (
     <Container className="main-c" fluid>
       <Routes>
-        <Route path = "/" element = {<NoteList availableTags={tags}/>} />
-        <Route path = "/new" element = {<NewNote onSubmit={onCreateNote} onAddTag={onCreateTag} availableTags={tags} />} />
-        <Route path = "/:id">
-          <Route index element = {<h1>Index</h1>} />
-          <Route path = "edit" element = {<h1>Edit</h1>} />
+        <Route path="/" element={<NoteList notes={notes} availableTags={tags} />} />
+        <Route path="/new" element={<NewNote onSubmit={onCreateNote} onAddTag={onCreateTag} availableTags={tags} />} />
+        <Route path="/:id">
+          <Route index element={<h1>Index</h1>} />
+          <Route path="edit" element={<h1>Edit</h1>} />
         </Route>
-        <Route path = "*" element = {<Navigate to = "/"/>} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Container>
   );

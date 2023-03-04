@@ -34,7 +34,7 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
     }
 
     return (
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} className = "note-form">
             <Stack gap = {2}>
                <Row>
                     <Col>
@@ -64,20 +64,7 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                             }}
                             options={availableTags.map(tag =>{
                                 return {label:tag.label,value:tag.id}
-                            })}
-                            theme={theme => ({
-                                ...theme,
-                                borderRadius: 0,
-                                backgroundColor:"blue",
-                                color: "#c6a3390",
-                                colors: {
-                                  ...theme.colors,
-                                  primary: "#b90000",
-                                  primary25: "#c9cad0",
-                                  primary50: "#c9cad0"
-                                }
-                              })}
-                            
+                            })}                            
                             />
                         </Form.Group>
                     </Col>
@@ -87,9 +74,9 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                             <Form.Control required as="textarea" rows={15} ref = {markdownRef}/>
                 </Form.Group>
                 <Stack direction="horizontal" gap={2} className = "justify-content-end">
-                    <button className="btn-save">Save</button>
+                    <button className="button" id="save">Save</button>
                     <Link to="/">
-                        <button className="btn-save">Cancel</button>
+                        <button className="button" id="cancel">Cancel</button>
                     </Link>
                 </Stack>
             </Stack>
