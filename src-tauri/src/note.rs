@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::io::{Write, BufWriter};
 use std::path::PathBuf;
 use std::{
     fs,
@@ -17,6 +18,14 @@ pub struct Note {
     pub title: String,
     pub markdown: String,
     pub tags: Vec<Tag>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SimplifiedNote {
+    pub id: String,
+    pub title: String,
+    pub markdown: String,
 }
 
 #[derive(Debug, Serialize, Deserialize,Clone)]
@@ -97,6 +106,19 @@ impl NoteHandler {
         let mut file = get_file(&TAGS_WORK_DIR, &tag.id).await?;
         let tag = serde_json::to_string(&tag).unwrap();
         let mut buf = Cursor::new(tag);
+        file.write_all_buf(&mut buf).await?;
+        Ok(())
+    }
+
+    pub async fn edit_note(&self,id:&str,note: Note) -> Result<(), io::Error> {
+        let mut path = NOTES_WORK_DIR.to_owned();
+        path.push_str(id);
+        let mut file = tokio::fs::OpenOptions::new()
+                            .write(true)
+                            .truncate(true)
+                            .open(path).await?;
+        let note = serde_json::to_string(&note).unwrap();
+        let mut buf = Cursor::new(note);
         file.write_all_buf(&mut buf).await?;
         Ok(())
     }

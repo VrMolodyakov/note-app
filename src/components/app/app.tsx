@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css"
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import React, { useEffect, useState } from 'react'
 import { Container } from "react-bootstrap";
 import { NewNote } from "../../futures/note/note";
@@ -7,19 +7,31 @@ import { invoke } from '@tauri-apps/api/tauri'
 import { NoteList } from "../../futures/note/list/note-list";
 import { NoteData } from "../note/note-data";
 import { Tag } from "../note/tag";
-
 import "./app.css"
-import { Select } from "../select/select";
 import { Note } from "../note/note";
+import { NoteLayout } from "../note/layout/note-layout";
+import { NoteView } from "../../futures/note/view/note-view";
+import { EditNote } from "../../futures/note/edit/note-edit";
 
 function App() {
 
   const [tags, setTags] = useState<Tag[]>([])
   const [notes, setNotes] = useState<Note[]>([])
+  const location = useLocation();
 
   async function onCreateNote(data: NoteData) {
-    console.log(data)
-    await invoke('create_note', { note: data }).catch((e) => console.error(e));
+    var newNote:Note = {
+      id:uuidV4(),
+      ...data
+    }
+    console.log(newNote)
+    setNotes(prev => [...prev, newNote])
+    await invoke('create_note', { note: newNote }).catch((e) => console.error(e))
+  }
+
+  async function onEditNote(id:string,edit: NoteData){
+    console.log("new data : ",edit)
+    await invoke('edit_note',{note:edit}).catch((e) => console.error(e))
   }
 
   function getAvailableTags() {
@@ -40,7 +52,6 @@ function App() {
   }
 
   useEffect(() => {
-    console.log("use effect")
     getAvailableTags()
     getAvailableNotes()
   }, []);
@@ -75,9 +86,9 @@ function App() {
       <Routes>
         <Route path="/" element={<NoteList notes={notes} availableTags={tags} />} />
         <Route path="/new" element={<NewNote onSubmit={onCreateNote} onAddTag={onCreateTag} availableTags={tags} />} />
-        <Route path="/:id">
-          <Route index element={<h1>Index</h1>} />
-          <Route path="edit" element={<h1>Edit</h1>} />
+        <Route path="/:id" element={<NoteLayout notes={notes}/> }>
+          <Route index element={<NoteView/>} />
+          <Route path="edit" element={<EditNote onSubmit={onEditNote} onAddTag={onCreateTag} availableTags={tags}/>} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
@@ -86,3 +97,7 @@ function App() {
 }
 
 export default App;
+function uuidV4(): string {
+  throw new Error("Function not implemented.");
+}
+

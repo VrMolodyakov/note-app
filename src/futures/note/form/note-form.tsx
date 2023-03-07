@@ -24,7 +24,6 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
     function handleSubmit(e:FormEvent)  {
         e.preventDefault()
         onSubmit({
-            id:uuidV4(),
             title:titleRef.current!.value,
             markdown:markdownRef.current!.value,
             tags:selectedTags

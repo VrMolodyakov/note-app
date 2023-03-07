@@ -9,9 +9,7 @@ use tracing::Level;
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 use note::{Note,Tag,NoteHandler};
-use window_vibrancy::NSVisualEffectMaterial;
 use window_vibrancy::apply_blur;
-use window_vibrancy::apply_vibrancy;
 
 #[derive(Debug, thiserror::Error)]
 enum Error {
@@ -60,7 +58,7 @@ async fn main() {
             Ok(())
         })
         .manage(note_handler)
-        .invoke_handler(tauri::generate_handler![create_note,create_tag,load_tags,load_notes])
+        .invoke_handler(tauri::generate_handler![create_note,create_tag,load_tags,load_notes,edit_note])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
     info!("END");
@@ -79,19 +77,24 @@ async fn create_tag(tag: Tag, handler: tauri::State<'_, NoteHandler>) -> Result<
 }
 
 #[tauri::command]
-async fn load_tags(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Tag>, ()> {
+async fn load_tags(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Tag>, Error> {
     info!("request to load tags");
     let tags = handler.get_tags().await;
-    info!("get tags : {:?}",tags);
     Ok(tags)
 }
 
 #[tauri::command]
-async fn load_notes(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Note>, ()> {
+async fn load_notes(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Note>, Error> {
     info!("request to load tags");
     let tags = handler.get_notes().await;
-    info!("get notes : {:?}",tags);
     Ok(tags)
+}
+
+#[tauri::command]
+async fn edit_note(id:String,note: Note,handler: tauri::State<'_, NoteHandler>) -> Result<(), Error> {
+    info!("request to edit note");
+    handler.edit_note(id.as_str(), note).await?;
+    Ok(())
 }
 
 #[test]
@@ -110,17 +113,3 @@ fn test_serde() {
     let deserialized: Note = serde_json::from_str(&serialized).unwrap();
     println!("deserialized = {:?}", deserialized);
 }
-
-// #[tokio::test]
-// async fn test_file() {
-//     if let Err(is_exs) = file::is_exists("abc.txt").await {
-//         println!("file exists: {}", is_exs);
-//     }
-// }
-
-// #[tokio::test]
-// async fn test_create_file() {
-//     if let Ok(file) = file::create("abc.txt").await {
-//         println!("file exists: {:?}", file.metadata().await);
-//     }
-// }
