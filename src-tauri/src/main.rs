@@ -4,12 +4,18 @@
 )]
 
 mod note;
+use tokio::sync::Mutex;
+
 use tauri::Manager;
 use tracing::Level;
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 use note::{Note,Tag,NoteHandler};
 use window_vibrancy::apply_blur;
+
+struct HandlerState{
+    handler:Mutex<NoteHandler>
+}
 
 #[derive(Debug, thiserror::Error)]
 enum Error {
@@ -32,17 +38,14 @@ impl serde::Serialize for Error {
 
 #[tokio::main]
 async fn main() {
-    let mut note_handler = note::NoteHandler::new();
-    if let Err(error) = note_handler.init_dir().await{
-        panic!("{}",error);
-    }
-    if let Err(error) = note_handler.load_notes(){
-        info!("{}",error);
-    }
-    if let Err(error) = note_handler.load_tags(){
-        info!("{}",error);
-    }
+    let note_handler = HandlerState{
+        handler : Mutex::new(
+            note::NoteHandler::new()
+        )
+    };
 
+    init(&note_handler).await;
+    
     let subscriber = FmtSubscriber::builder()
                     .with_max_level(Level::TRACE)
                     .finish();
@@ -65,7 +68,8 @@ async fn main() {
 }
 
 #[tauri::command]
-async fn create_note(note: Note, handler: tauri::State<'_, NoteHandler>) -> Result<(), Error> {
+async fn create_note(note: Note, state: tauri::State<'_, HandlerState>) -> Result<(), Error> {
+    let handler = state.handler.lock().await;
     handler.create_note(note).await?;
     Ok(())
 }
@@ -91,10 +95,26 @@ async fn load_notes(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Note>,
 }
 
 #[tauri::command]
-async fn edit_note(id:String,note: Note,handler: tauri::State<'_, NoteHandler>) -> Result<(), Error> {
+async fn edit_note(note: Note,state: tauri::State<'_, HandlerState>) -> Result<(), Error> {
     info!("request to edit note");
-    handler.edit_note(id.as_str(), note).await?;
+    let mut handler = state.handler.lock().await;
+    handler.edit_note(note).await?;
     Ok(())
+}
+
+async fn init(state:&HandlerState){
+    
+    let mut handler = state.handler.lock().await;
+    
+    if let Err(error) = handler.init_dir().await{
+        panic!("{}",error);
+    }
+    if let Err(error) = handler.load_notes(){
+        info!("{}",error);
+    }
+    if let Err(error) = handler.load_tags(){
+        info!("{}",error);
+    }
 }
 
 #[test]

@@ -1,5 +1,6 @@
+use serde::de::{DeserializeOwned};
 use serde::{Deserialize, Serialize};
-use std::io::{Write, BufWriter};
+use std::error::Error;
 use std::path::PathBuf;
 use std::{
     fs,
@@ -11,7 +12,7 @@ use tokio::{fs::File, io::AsyncWriteExt};
 pub const NOTES_WORK_DIR: &str = "../../note-store/notes/";
 pub const TAGS_WORK_DIR: &str = "../../note-store/tags/";
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize,Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Note {
     pub id: String,
@@ -48,94 +49,96 @@ impl NoteHandler {
         }
     }
 
-    pub fn load_notes(&mut self) -> Result<(), io::Error> {
+    pub fn load_notes(&mut self) -> Result<(), Box<dyn Error>> {
         let files = notes()?;
         for path in files {
             let file = fs::File::open(path)?;
-            let reader = BufReader::new(file);
-            let note: Note = serde_json::from_reader(reader)?;
+            let note = read_json::<Note>(file)?;
             self.notes.push(note);
         }
         Ok(())
     }
 
-    pub fn load_tags(&mut self) -> Result<(), io::Error> {
+    pub fn load_tags(&mut self) -> Result<(), Box<dyn Error>> {
         let files = tags()?;
         for path in files {
             let file = fs::File::open(path)?;
-            let reader = BufReader::new(file);
-            let tag: Tag = serde_json::from_reader(reader)?;
+            let tag = read_json::<Tag>(file)?;
             self.tags.push(tag);
         }
         Ok(())
     }
 
     pub async fn get_tags(&self) -> Vec<Tag> {
-        let mut tags = Vec::new();
-        self.tags.iter().for_each(|f| {
-            tags.push(Tag {
-                id: f.id.to_owned(),
-                label: f.label.to_owned(),
-            })
-        });
-        tags
+        self.tags.to_vec()
     }
 
     pub async fn get_notes(&self) -> Vec<Note> {
-        let mut notes = Vec::new();
-        self.notes.iter().for_each(|i| {
-            notes.push(Note {
-                title: i.title.to_owned(),
-                markdown: i.markdown.to_owned(),
-                tags: get_tags(i),
-                id: i.id.to_owned(),
-            })
-        });
-        notes
+        self.notes.to_vec()
     }
 
     pub async fn create_note(&self,note: Note) -> Result<(), io::Error> {
-        let mut file = get_file(&NOTES_WORK_DIR, &note.id).await?;
-        let note = serde_json::to_string(&note).unwrap();
-        let mut buf = Cursor::new(note);
-        file.write_all_buf(&mut buf).await?;
+        let file = get_file(&NOTES_WORK_DIR, &note.id).await?;
+        write_json(&note, file).await?;
         Ok(())
     }
 
     pub async fn create_tag(&self,tag:Tag) ->Result<(),io::Error>{
-        let mut file = get_file(&TAGS_WORK_DIR, &tag.id).await?;
-        let tag = serde_json::to_string(&tag).unwrap();
-        let mut buf = Cursor::new(tag);
-        file.write_all_buf(&mut buf).await?;
+        let file = get_file(&TAGS_WORK_DIR, &tag.id).await?;
+        write_json(&tag, file).await?;
         Ok(())
     }
 
-    pub async fn edit_note(&self,id:&str,note: Note) -> Result<(), io::Error> {
+    pub async fn edit_note(&mut self,note: Note) -> Result<(), io::Error> {
         let mut path = NOTES_WORK_DIR.to_owned();
-        path.push_str(id);
-        let mut file = tokio::fs::OpenOptions::new()
+        path.push_str(&note.id);
+        let file = tokio::fs::OpenOptions::new()
                             .write(true)
                             .truncate(true)
                             .open(path).await?;
-        let note = serde_json::to_string(&note).unwrap();
-        let mut buf = Cursor::new(note);
-        file.write_all_buf(&mut buf).await?;
+        write_json(&note, file).await?;
+        self.replace(note);
         Ok(())
+    }
+
+    fn replace(&mut self,note:Note) {
+        for n in self.notes.iter_mut() {
+            if n.id == note.id{
+                n.markdown = note.markdown;
+                n.title = note.title;
+                n.tags = note.tags;
+                break;
+            }
+        }
     }
 
     pub async fn init_dir(&self) -> Result<(),std::io::Error>{
         create_folder().await?;
         Ok(())
     }
+
+    fn get_tags_from_note(note:&Note) ->Vec<Tag>{
+        let mut tags = Vec::new();
+        note.tags.iter().for_each(|t| {
+            let cln = t.to_owned();
+            tags.push(cln);
+        });
+        tags
+    }
+    
 }
 
-pub fn get_tags(note:&Note) ->Vec<Tag>{
-    let mut tags = Vec::new();
-    note.tags.iter().for_each(|t| {
-        let cln = t.to_owned();
-        tags.push(cln);
-    });
-    tags
+async fn write_json<T:Serialize>(content:&T,mut file:File) -> Result<(), io::Error>{
+    let json = serde_json::to_string(content).unwrap();
+    let mut buf = Cursor::new(json);
+    file.write_all_buf(&mut buf).await?;
+    Ok(())
+}
+
+fn read_json<T: DeserializeOwned>(file:fs::File) -> Result<T, Box<dyn Error>>{
+    let reader = BufReader::new(file);
+    let content = serde_json::from_reader(reader)?;
+    Ok(content)
 }
 
 pub async fn get_file(dir: &str,file_name:&str) ->  Result<File, io::Error>{

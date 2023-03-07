@@ -29,7 +29,7 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
             tags:selectedTags
         })
 
-        navigate("..")
+        navigate("/")
     }
 
     return (

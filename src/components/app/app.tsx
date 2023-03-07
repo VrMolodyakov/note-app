@@ -12,6 +12,7 @@ import { Note } from "../note/note";
 import { NoteLayout } from "../note/layout/note-layout";
 import { NoteView } from "../../futures/note/view/note-view";
 import { EditNote } from "../../futures/note/edit/note-edit";
+import {v4 as uuidV4} from "uuid"
 
 function App() {
 
@@ -29,9 +30,14 @@ function App() {
     await invoke('create_note', { note: newNote }).catch((e) => console.error(e))
   }
 
-  async function onEditNote(id:string,edit: NoteData){
-    console.log("new data : ",edit)
-    await invoke('edit_note',{note:edit}).catch((e) => console.error(e))
+  async function onEditNote(id:string,editData: NoteData){
+    console.log("new data : ",editData)
+    var editNote:Note = {
+      id:id,
+      ...editData
+    }
+    setNotes([])
+    invoke('edit_note',{note:editNote}).then(() => getAvailableNotes()).catch((e) => console.error(e))
   }
 
   function getAvailableTags() {
@@ -43,6 +49,7 @@ function App() {
   }
 
   function getAvailableNotes() {
+    console.log("get notes")
     invoke('load_notes').then((notes) => {
       if (isNonEmptyArrayOfNotes(notes)) {
         console.log(notes)
@@ -54,6 +61,12 @@ function App() {
   useEffect(() => {
     getAvailableTags()
     getAvailableNotes()
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.previousUrl === "/edit"){
+      console.log("edit")
+    }
   }, []);
 
   function isNonEmptyArrayOfTags(value: unknown): value is Tag[] {
@@ -97,7 +110,4 @@ function App() {
 }
 
 export default App;
-function uuidV4(): string {
-  throw new Error("Function not implemented.");
-}
 
