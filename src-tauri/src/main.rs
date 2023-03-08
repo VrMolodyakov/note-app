@@ -52,6 +52,7 @@ async fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
     info!("app has started");
     tauri::Builder::default()
+        .manage(note_handler)
         .setup(|app| {
             let window = app.get_window("main").unwrap();
             #[cfg(target_os = "windows")]
@@ -60,8 +61,15 @@ async fn main() {
             window.set_decorations(true)?;
             Ok(())
         })
-        .manage(note_handler)
-        .invoke_handler(tauri::generate_handler![create_note,create_tag,load_tags,load_notes,edit_note])
+        .invoke_handler(tauri::generate_handler![
+            create_note,
+            create_tag,
+            load_tags,
+            load_notes,
+            edit_note,
+            delete_note,
+            edit_tag,
+            delete_tag])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
     info!("END");
@@ -75,20 +83,23 @@ async fn create_note(note: Note, state: tauri::State<'_, HandlerState>) -> Resul
 }
 
 #[tauri::command]
-async fn create_tag(tag: Tag, handler: tauri::State<'_, NoteHandler>) -> Result<(), Error> {
+async fn create_tag(tag: Tag, state: tauri::State<'_, HandlerState>) -> Result<(), Error> {
+     let handler = state.handler.lock().await;
     handler.create_tag(tag).await?;
     Ok(())
 }
 
 #[tauri::command]
-async fn load_tags(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Tag>, Error> {
+async fn load_tags(state: tauri::State<'_, HandlerState>) -> Result<Vec<Tag>, Error> {
+     let handler = state.handler.lock().await;
     info!("request to load tags");
     let tags = handler.get_tags().await;
     Ok(tags)
 }
 
 #[tauri::command]
-async fn load_notes(handler: tauri::State<'_, NoteHandler>) -> Result<Vec<Note>, Error> {
+async fn load_notes(state: tauri::State<'_, HandlerState>) -> Result<Vec<Note>, Error> {
+     let handler = state.handler.lock().await;
     info!("request to load tags");
     let tags = handler.get_notes().await;
     Ok(tags)
@@ -102,8 +113,31 @@ async fn edit_note(note: Note,state: tauri::State<'_, HandlerState>) -> Result<(
     Ok(())
 }
 
+#[tauri::command]
+async fn delete_note(id:String,state: tauri::State<'_, HandlerState>) -> Result<(), Error> {
+    info!("request to edit note");
+    let handler = state.handler.lock().await;
+    handler.delete_note(id.as_str()).await?;
+    Ok(())
+}
+
+#[tauri::command]
+async fn edit_tag(tag: Tag,state: tauri::State<'_, HandlerState>) -> Result<(), Error> {
+    info!("request to edit note");
+    let mut handler = state.handler.lock().await;
+    handler.edit_tag(tag).await?;
+    Ok(())
+}
+
+#[tauri::command]
+async fn delete_tag(id:String,state: tauri::State<'_, HandlerState>) -> Result<(), Error> {
+    info!("request to edit note");
+    let handler = state.handler.lock().await;
+    handler.delete_tag(id.as_str()).await?;
+    Ok(())
+}
+
 async fn init(state:&HandlerState){
-    
     let mut handler = state.handler.lock().await;
     
     if let Err(error) = handler.init_dir().await{

@@ -8,10 +8,13 @@ import { Tag } from "../../../components/note/tag";
 import { style } from "../../../components/note/tag-style";
 import "./note-list.css"
 import styles from "./card.module.css"
+import { EditTagsModal } from "../../tag/tag-modal";
 
 type NoteListProps = {
     availableTags: Tag[]
     notes: Note[]
+    onDeleteTag: (id: string) => void
+    onEditTag: (id: string, label: string) => void
 }
 
 type SimplifiedNote = {
@@ -20,9 +23,15 @@ type SimplifiedNote = {
     id: string
 }
 
-export function NoteList({ availableTags, notes }: NoteListProps) {
+export function NoteList({ 
+    availableTags, 
+    notes,
+    onEditTag,
+    onDeleteTag, }: NoteListProps) {
+
     const [selectedTags, setSelectedTags] = useState<Tag[]>([])
     const [title, setTitle] = useState("")
+    const [modalIsOpen, setModalIsOpen] = useState(false)
 
     const filteredNotes = useMemo(() => {
         return notes.filter(note => {
@@ -46,7 +55,10 @@ export function NoteList({ availableTags, notes }: NoteListProps) {
                         <Link to={"/new"}>
                             <Button variant="primary" className="mt-2">Create</Button>
                         </Link>
-                        <Button variant="outline-secondary" className="mt-2">Edit Tags</Button>
+                        <Button 
+                        variant="outline-secondary" 
+                        className="mt-2"
+                        onClick={() => setModalIsOpen(true)}>Edit Tags</Button>
                     </Stack>
 
                 </Col>
@@ -88,6 +100,13 @@ export function NoteList({ availableTags, notes }: NoteListProps) {
                     </Col>
                 ))}
             </Row>
+            <EditTagsModal 
+              onEditTag={onEditTag}
+              onDeleteTag={onDeleteTag}
+              show={modalIsOpen}
+              handleClose={() => setModalIsOpen(false)}
+              availableTags={availableTags}
+            />
         </>
     )
 }

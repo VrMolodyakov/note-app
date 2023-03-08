@@ -13,12 +13,20 @@ type NoteFormProps = {
     onSubmit: (data:NoteData) => void
     onAddTag:(tag:Tag) => void
     availableTags:Tag[]
-}
+} & Partial<NoteData>
 
-export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
+export function NoteFrom({
+    onSubmit,
+    onAddTag,
+    availableTags,
+    title = "",
+    markdown = "",
+    tags = []
+    }:NoteFormProps){
+
     const titleRef = useRef<HTMLInputElement>(null)
     const markdownRef = useRef<HTMLTextAreaElement>(null)
-    const [selectedTags,setSelectedTags] = useState<Tag[]>([])
+    const [selectedTags,setSelectedTags] = useState<Tag[]>(tags)
     const navigate = useNavigate()
  
     function handleSubmit(e:FormEvent)  {
@@ -39,7 +47,7 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                     <Col>
                         <Form.Group controlId="title">
                             <Form.Label>Title</Form.Label>
-                            <Form.Control className="input-ttl" ref={titleRef} required/>
+                            <Form.Control className="input-ttl" ref={titleRef} required defaultValue={title}/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -69,8 +77,12 @@ export function NoteFrom({onSubmit,onAddTag,availableTags}:NoteFormProps){
                     </Col>
                </Row>
                <Form.Group controlId="markdown">
-                            <Form.Label>Body</Form.Label>
-                            <Form.Control required as="textarea" rows={15} ref = {markdownRef}/>
+                    <Form.Label>Body</Form.Label>
+                    <Form.Control 
+                    required as="textarea" 
+                    rows={15} 
+                    ref = {markdownRef} 
+                    defaultValue={markdown}/>
                 </Form.Group>
                 <Stack direction="horizontal" gap={2} className = "justify-content-end">
                     <button className="button" id="save">Save</button>

@@ -36,8 +36,31 @@ function App() {
       id:id,
       ...editData
     }
-    setNotes([])
-    invoke('edit_note',{note:editNote}).then(() => getAvailableNotes()).catch((e) => console.error(e))
+    invoke('edit_note',{note:editNote})
+      .then(() => getAvailableNotes())
+      .catch((e) => console.error(e))
+  }
+
+  async function onDeleteNote(id:string) {
+    invoke('delete_note',{id:id})
+    .then(() => getAvailableNotes())
+    .catch((e) => console.error(e))
+  }
+
+  async function onDeleteTag(id:string) {
+    invoke('delete_tag',{id:id})
+    .then(() => getAvailableTags())
+    .catch((e) => console.error(e))
+  }
+
+  async function onEditTag(id: string, label: string){
+    var editTag:Tag = {
+      id:id,
+      label:label
+    }
+    invoke('edit_note',{tag:editTag})
+      .then(() => getAvailableTags())
+      .catch((e) => console.error(e))
   }
 
   function getAvailableTags() {
@@ -97,10 +120,10 @@ function App() {
   return (
     <Container className="main-c" fluid>
       <Routes>
-        <Route path="/" element={<NoteList notes={notes} availableTags={tags} />} />
+        <Route path="/" element={<NoteList notes={notes} availableTags={tags} onDeleteTag={onDeleteTag} onEditTag={onEditTag}/>} />
         <Route path="/new" element={<NewNote onSubmit={onCreateNote} onAddTag={onCreateTag} availableTags={tags} />} />
         <Route path="/:id" element={<NoteLayout notes={notes}/> }>
-          <Route index element={<NoteView/>} />
+          <Route index element={<NoteView onDelete={onDeleteNote}/>} />
           <Route path="edit" element={<EditNote onSubmit={onEditNote} onAddTag={onCreateTag} availableTags={tags}/>} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />

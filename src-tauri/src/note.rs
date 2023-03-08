@@ -97,11 +97,37 @@ impl NoteHandler {
                             .truncate(true)
                             .open(path).await?;
         write_json(&note, file).await?;
-        self.replace(note);
+        self.replace_note(note);
         Ok(())
     }
 
-    fn replace(&mut self,note:Note) {
+    pub async fn edit_tag(&mut self,tag: Tag) -> Result<(), io::Error> {
+        let mut path = TAGS_WORK_DIR.to_owned();
+        path.push_str(&tag.id);
+        let file = tokio::fs::OpenOptions::new()
+                            .write(true)
+                            .truncate(true)
+                            .open(path).await?;
+        write_json(&tag, file).await?;
+        self.replace_tag(tag);
+        Ok(())
+    }
+
+    pub async fn delete_note(&self,id:&str) -> Result<(), io::Error>{
+        let mut path = NOTES_WORK_DIR.to_owned();
+        path.push_str(id);
+        tokio::fs::remove_file(path).await?;
+        Ok(())
+    }
+
+    pub async fn delete_tag(&self,id:&str) -> Result<(), io::Error>{
+        let mut path = TAGS_WORK_DIR.to_owned();
+        path.push_str(id);
+        tokio::fs::remove_file(path).await?;
+        Ok(())
+    }
+
+    fn replace_note(&mut self,note:Note) {
         for n in self.notes.iter_mut() {
             if n.id == note.id{
                 n.markdown = note.markdown;
@@ -112,20 +138,20 @@ impl NoteHandler {
         }
     }
 
+    fn replace_tag(&mut self,tag:Tag) {
+        for t in self.tags.iter_mut() {
+            if t.id == tag.id{
+                t.label = tag.label;
+                break;
+            }
+        }
+    }
+
     pub async fn init_dir(&self) -> Result<(),std::io::Error>{
         create_folder().await?;
         Ok(())
     }
 
-    fn get_tags_from_note(note:&Note) ->Vec<Tag>{
-        let mut tags = Vec::new();
-        note.tags.iter().for_each(|t| {
-            let cln = t.to_owned();
-            tags.push(cln);
-        });
-        tags
-    }
-    
 }
 
 async fn write_json<T:Serialize>(content:&T,mut file:File) -> Result<(), io::Error>{
