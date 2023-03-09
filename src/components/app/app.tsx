@@ -12,7 +12,7 @@ import { Note } from "../note/note";
 import { NoteLayout } from "../note/layout/note-layout";
 import { NoteView } from "../../futures/note/view/note-view";
 import { EditNote } from "../../futures/note/edit/note-edit";
-import {v4 as uuidV4} from "uuid"
+import { v4 as uuidV4 } from "uuid"
 
 function App() {
 
@@ -21,8 +21,8 @@ function App() {
   const location = useLocation();
 
   async function onCreateNote(data: NoteData) {
-    var newNote:Note = {
-      id:uuidV4(),
+    var newNote: Note = {
+      id: uuidV4(),
       ...data
     }
     console.log(newNote)
@@ -30,38 +30,60 @@ function App() {
     await invoke('create_note', { note: newNote }).catch((e) => console.error(e))
   }
 
-  async function onEditNote(id:string,editData: NoteData){
-    console.log("new data : ",editData)
-    var editNote:Note = {
-      id:id,
+  async function onEditNote(id: string, editData: NoteData) {
+    console.log("new data : ", editData)
+    var editNote: Note = {
+      id: id,
       ...editData
     }
-    invoke('edit_note',{note:editNote})
+    invoke('edit_note', { note: editNote })
       .then(() => getAvailableNotes())
       .catch((e) => console.error(e))
   }
 
-  async function onDeleteNote(id:string) {
-    invoke('delete_note',{id:id})
-    .then(() => getAvailableNotes())
-    .catch((e) => console.error(e))
-  }
-
-  async function onDeleteTag(id:string) {
-    invoke('delete_tag',{id:id})
-    .then(() => getAvailableTags())
-    .catch((e) => console.error(e))
-  }
-
-  async function onEditTag(id: string, label: string){
-    var editTag:Tag = {
-      id:id,
-      label:label
+  async function onDeleteNote(id: string) {
+    if (notes.length === 1){
+      console.log("inside")
+      setNotes([])
+      await invoke('delete_note', { id: id })
+      .catch((e) => console.error(e))
     }
-    invoke('edit_note',{tag:editTag})
+    await invoke('delete_note', { id: id })
+      .then(() => getAvailableNotes())
+      .catch((e) => console.error(e))
+    console.log(notes)
+  }
+
+  async function onDeleteTag(id: string) {
+    invoke('delete_tag', { id: id })
       .then(() => getAvailableTags())
       .catch((e) => console.error(e))
   }
+
+  function onEditTag(id: string, label: string) {
+    setTags(prevTags => {
+      return prevTags.map(tag => {
+        if (tag.id === id) {
+          return { ...tag, label }
+        } else {
+          return tag
+        }
+      })
+    })
+  }
+
+  function completeEditTag(id: string, label: string) {
+    var editTag: Tag = {
+      id: id,
+      label: label
+    }
+    console.log(editTag)
+    invoke('edit_tag', { tag: editTag })
+      .then(() => getAvailableTags())
+      .catch((e) => console.error(e))
+
+  }
+
 
   function getAvailableTags() {
     invoke('load_tags').then((tags) => {
@@ -87,7 +109,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (location.state?.previousUrl === "/edit"){
+    if (location.state?.previousUrl === "/edit") {
       console.log("edit")
     }
   }, []);
@@ -120,11 +142,11 @@ function App() {
   return (
     <Container className="main-c" fluid>
       <Routes>
-        <Route path="/" element={<NoteList notes={notes} availableTags={tags} onDeleteTag={onDeleteTag} onEditTag={onEditTag}/>} />
+        <Route path="/" element={<NoteList notes={notes} availableTags={tags} onDeleteTag={onDeleteTag} onEditTag={onEditTag} completeEdit={completeEditTag}/>} />
         <Route path="/new" element={<NewNote onSubmit={onCreateNote} onAddTag={onCreateTag} availableTags={tags} />} />
-        <Route path="/:id" element={<NoteLayout notes={notes}/> }>
-          <Route index element={<NoteView onDelete={onDeleteNote}/>} />
-          <Route path="edit" element={<EditNote onSubmit={onEditNote} onAddTag={onCreateTag} availableTags={tags}/>} />
+        <Route path="/:id" element={<NoteLayout notes={notes} />}>
+          <Route index element={<NoteView onDelete={onDeleteNote} />} />
+          <Route path="edit" element={<EditNote onSubmit={onEditNote} onAddTag={onCreateTag} availableTags={tags} />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

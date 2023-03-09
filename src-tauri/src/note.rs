@@ -77,15 +77,17 @@ impl NoteHandler {
         self.notes.to_vec()
     }
 
-    pub async fn create_note(&self,note: Note) -> Result<(), io::Error> {
+    pub async fn create_note(&mut self,note: Note) -> Result<(), io::Error> {
         let file = get_file(&NOTES_WORK_DIR, &note.id).await?;
         write_json(&note, file).await?;
+        self.notes.push(note);
         Ok(())
     }
 
-    pub async fn create_tag(&self,tag:Tag) ->Result<(),io::Error>{
+    pub async fn create_tag(&mut self,tag:Tag) ->Result<(),io::Error>{
         let file = get_file(&TAGS_WORK_DIR, &tag.id).await?;
         write_json(&tag, file).await?;
+        self.tags.push(tag);
         Ok(())
     }
 
@@ -113,17 +115,19 @@ impl NoteHandler {
         Ok(())
     }
 
-    pub async fn delete_note(&self,id:&str) -> Result<(), io::Error>{
+    pub async fn delete_note(&mut self,id:&str) -> Result<(), io::Error>{
         let mut path = NOTES_WORK_DIR.to_owned();
         path.push_str(id);
         tokio::fs::remove_file(path).await?;
+        self.remove_note(id);
         Ok(())
     }
 
-    pub async fn delete_tag(&self,id:&str) -> Result<(), io::Error>{
+    pub async fn delete_tag(&mut self,id:&str) -> Result<(), io::Error>{
         let mut path = TAGS_WORK_DIR.to_owned();
         path.push_str(id);
         tokio::fs::remove_file(path).await?;
+        self.remove_tag(id);
         Ok(())
     }
 
@@ -145,6 +149,26 @@ impl NoteHandler {
                 break;
             }
         }
+    }
+
+    fn remove_note(&mut self,id:&str){
+        Self::delete_from_vec(&mut self.notes, |n:&Note| return n.id == id)
+    }
+
+    fn remove_tag(&mut self,id:&str){
+       Self::delete_from_vec(&mut self.tags, |t:&Tag| return t.id == id)
+    }
+
+    fn delete_from_vec<T,P>(v:&mut Vec<T>,predicate:P)
+    where 
+        T:Sized,
+        P: FnMut(&T) -> bool{
+            
+            if let Some(index) = v
+            .iter()
+            .position(predicate){
+                v.remove(index);
+            }
     }
 
     pub async fn init_dir(&self) -> Result<(),std::io::Error>{
@@ -212,3 +236,9 @@ pub fn notes() -> Result<Vec<PathBuf>, io::Error> {
 pub fn tags() -> Result<Vec<PathBuf>, io::Error> {
     files(TAGS_WORK_DIR)
 }
+
+// if let Some(index) = self.notes
+// .iter()
+// .position(|n| n.id == id){
+//     self.notes.remove(index);
+// }

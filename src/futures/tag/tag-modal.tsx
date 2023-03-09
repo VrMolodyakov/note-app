@@ -8,6 +8,7 @@ type EditTagsModalProps = {
     handleClose: () => void
     onDeleteTag: (id: string) => void
     onEditTag: (id: string, label: string) => void
+    completeEdit: (id: string, label: string) => void
   }
 
 export function EditTagsModal({
@@ -15,6 +16,7 @@ export function EditTagsModal({
     handleClose,
     show,
     onDeleteTag,
+    completeEdit,
     onEditTag,
   }: EditTagsModalProps) {
     return (
@@ -31,7 +33,8 @@ export function EditTagsModal({
                     <Form.Control
                       type="text"
                       value={tag.label}
-                      onChange={e => onEditTag(tag.id, e.target.value)}
+                      onBlur={e => completeEdit(tag.id, e.target.value)}
+                      onChange={(e)=> onEditTag(tag.id, e.target.value)}
                     />
                   </Col>
                   <Col xs="auto">
