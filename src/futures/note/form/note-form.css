@@ -22,19 +22,20 @@
 
 #title{
   background-color: #fff0;
-  border-color: #a3c639;
+  border-color: #3984c6;
   color: white;
+  font-size: 20px;
 }
 
 #markdown.form-control:focus {
     background: none repeat scroll 0 0 #c5b3b34b;
     outline-width: 0;
-    border:1px solid rgb(82, 207, 9);
-    border-color: #a3c639;
+    border:1px solid #2124ce;
+    border-color: #3984c6;
 }
 
 #markdown.form-control {
-  border-color: #a3c639;
+  border-color: #3984c6;
 }
 
 #title.form-control:focus {
@@ -110,9 +111,9 @@
 }
 
 .note-form{
-  font-family: "Kanit";
+  font-family: "Sono", sans-serif; 
   font-size: 20px;
-  color: rgb(76, 177, 85);
+  color: rgb(255, 255, 255);
 }
 
 .button#cancel:after {

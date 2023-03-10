@@ -50,22 +50,21 @@ export function NoteList({
 
     return (
         <>
-            <Row className="align-items-center mb-4">
+            <Row className="align-items-center mb-4 list-c">
                 <Col><h1 className="note-tag">Notes</h1></Col>
                 <Col xs="auto">
                     <Stack gap={2} direction="horizontal">
                         <Link to={"/new"}>
-                            <Button variant="primary" className="mt-2">Create</Button>
+                            <button className="button">Create</button>
                         </Link>
-                        <Button 
-                        variant="outline-secondary" 
-                        className="mt-2"
-                        onClick={() => setModalIsOpen(true)}>Edit Tags</Button>
+                        <button 
+                        className="button"
+                        onClick={() => setModalIsOpen(true)}>Edit Tags</button >
                     </Stack>
 
                 </Col>
             </Row>
-            <Form>
+            <Form className = "list-form">
                 <Row className="mb-4 mt-2">
                     <Col>
                         <Form.Group controlId="title">

@@ -2,39 +2,44 @@
 export const style = {
   control: (base: any, state: { isFocused: any; }) => ({
     ...base,
+    height:"44px",
     background: "#fff0",
     // match with the menu
     // Overwrittes the different states of border
-    borderColor: "green",
+    borderColor:"#3984c6",
     // Removes weird border around container
     boxShadow: state.isFocused ? null : null,
     "&:hover": {
       // Overwrittes the different states of border
-      borderColor: state.isFocused ? "red" : "blue"
+      borderColor:"#3984c6"
     }
   }),
   option: (styles: any, {isFocused, isSelected}: any) => ({
     ...styles,
     background: isFocused
-        ? 'rgba(22, 192, 79, 0.596)'
+        ? '#3984c6'
         : isSelected
-            ? 'rgba(22, 192, 79, 0.596)'
+            ? '#3984c6'
             : undefined,
     backgroundColor : "#fff0",
+    borderColor:"red",
+    border:"red"
 
   }),
   menu: (base: any) => ({
     ...base,
     // override border radius to match the box
-    borderRadius: 0,
-    // kill the gap
+    borderRadius: 0,    // kill the gap
     marginTop: 0,
-    backgroundColor : "#fff0",
+    backgroundColor : "#000000b5",
   }),
   menuList: (base: any) => ({
     ...base,
     // kill the white space on first and last option
     padding: 0,
+    fontFamily: 'Sono, sans-serif', 
+    fontSize: "20px",
+    color:"white",
     "::-webkit-scrollbar": {
       width: "4px",
       height: "0px",
@@ -48,6 +53,11 @@ export const style = {
     "::-webkit-scrollbar-thumb:hover": {
       background: "#555"
     }
+  }),
+  multiValue: (base: any) => ({
+    ...base,
+    // kill the white space on first and last option
+    backgroundColor:"hsl(162deg 100% 50%)"
   })
 };
 

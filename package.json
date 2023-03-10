@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@fontsource/kanit": "^4.5.10",
+    "@fontsource/sono": "^4.5.1",
     "@tauri-apps/api": "^1.2.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
