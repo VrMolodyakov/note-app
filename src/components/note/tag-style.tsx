@@ -4,6 +4,7 @@ export const style = {
     ...base,
     height:"44px",
     background: "#fff0",
+    color:"white",
     // match with the menu
     // Overwrittes the different states of border
     borderColor:"#3984c6",
@@ -57,8 +58,18 @@ export const style = {
   multiValue: (base: any) => ({
     ...base,
     // kill the white space on first and last option
-    backgroundColor:"hsl(162deg 100% 50%)"
-  })
+    color:"red",
+    backgroundColor:"#4b5bf0"
+  }),
+  input:(base: any) => ({
+    ...base,
+    color:"white",
+  }),
+  multiValueLabel: (base: any) => ({
+    ...base,
+    // kill the white space on first and last option
+    color:'white'
+  }),
 };
 
 

@@ -9,8 +9,8 @@ use std::{
 use tokio::fs::metadata;
 use tokio::{fs::File, io::AsyncWriteExt};
 
-pub const NOTES_WORK_DIR: &str = "../../note-store/notes/";
-pub const TAGS_WORK_DIR: &str = "../../note-store/tags/";
+pub const NOTES_WORK_DIR: &str = "./note-store/notes/";
+pub const TAGS_WORK_DIR: &str = "./note-store/tags/";
 
 #[derive(Debug, Serialize, Deserialize,Clone)]
 #[serde(rename_all = "camelCase")]
@@ -236,9 +236,3 @@ pub fn notes() -> Result<Vec<PathBuf>, io::Error> {
 pub fn tags() -> Result<Vec<PathBuf>, io::Error> {
     files(TAGS_WORK_DIR)
 }
-
-// if let Some(index) = self.notes
-// .iter()
-// .position(|n| n.id == id){
-//     self.notes.remove(index);
-// }

@@ -55,9 +55,15 @@ async fn main() {
         .manage(note_handler)
         .setup(|app| {
             let window = app.get_window("main").unwrap();
+
             #[cfg(target_os = "windows")]
             apply_blur(&window, Some((18, 18, 18, 125)))
             .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+
+            #[cfg(target_os = "macos")]
+            apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
+              .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+
             window.set_decorations(true)?;
             Ok(())
         })
@@ -102,7 +108,6 @@ async fn load_notes(state: tauri::State<'_, HandlerState>) -> Result<Vec<Note>, 
      let handler = state.handler.lock().await;
     info!("request to load notes");
     let notes = handler.get_notes().await;
-    println!("{:?}",notes);
     Ok(notes)
 }
 

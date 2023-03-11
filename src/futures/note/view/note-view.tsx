@@ -2,6 +2,7 @@ import { Badge, Button, Col, Row, Stack } from "react-bootstrap";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { Link, useNavigate } from "react-router-dom";
 import { useNote } from "../../../components/note/layout/note-layout";
+import "./note-view.css"
 
 type NoteProps = {
     onDelete: (id:string) => void
@@ -16,6 +17,7 @@ export function NoteView({onDelete}:NoteProps){
     }
 
     return <>
+        <div className="container">
         <Row className="align-items-center mb-4">
             <Col>
                 <h1>{note.title}</h1>
@@ -40,5 +42,6 @@ export function NoteView({onDelete}:NoteProps){
                 </Col>
         </Row>
         <ReactMarkdown>{note.markdown}</ReactMarkdown>
+        </div>
     </>
 }

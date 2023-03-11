@@ -18,7 +18,6 @@ function App() {
 
   const [tags, setTags] = useState<Tag[]>([])
   const [notes, setNotes] = useState<Note[]>([])
-  const location = useLocation();
 
   async function onCreateNote(data: NoteData) {
     var newNote: Note = {
@@ -106,12 +105,6 @@ function App() {
   useEffect(() => {
     getAvailableTags()
     getAvailableNotes()
-  }, []);
-
-  useEffect(() => {
-    if (location.state?.previousUrl === "/edit") {
-      console.log("edit")
-    }
   }, []);
 
   function isNonEmptyArrayOfTags(value: unknown): value is Tag[] {
